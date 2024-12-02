@@ -1,0 +1,113 @@
+#!/bin/bash
+
+if [[ ! $EUID == 0 ]]; then
+    echo "ERROR: You must run this script with sudo privilege."
+    exit 1
+fi
+
+# install nginx and ufw and their dependencies 
+pacman -S --noconfirm nginx ufw
+
+# NOTE: Task 1 -------------------------------------------------------------------------
+
+# Create system user "webgen"
+# System users are useful for adding an extra layer of security
+# By creating this webgen system user, we can essentially ensure that whatever task
+# this user is meant to carry out, it is the only user that can perform those 
+# tasks other than the root user. 
+# Additionally, users without root privilege cannot log into the system user.
+sudo useradd --system -d /var/lib/webgen -s /usr/bin/nologin -m webgen
+
+
+# Create bin and HTML directories inside webgen home folder
+mkdir /var/lib/webgen/bin
+mkdir /var/lib/webgen/HTML
+
+# Change ownership of bin and HTML directories created above
+chown -R webgen:webgen /var/lib/webgen
+
+# Copy generate_index script to /var/lib/webgen/bin
+cp ./generate_index /var/lib/webgen/bin
+
+# Change ownership of generate_index
+chown webgen:webgen /var/lib/webgen/bin/generate_index
+
+# NOTE: Task 2 -------------------------------------------------------------------------
+
+# Copy systemd unit files to /etc/systemd/system/
+cp ./generate-index.service /etc/systemd/system/
+cp ./generate-index.timer /etc/systemd/system/
+
+# Reload systmd units
+# This is necessary for systemd to see your changed unit files - in this case, the added
+# unit files from above
+systemctl daemon-reload
+
+# Start generate-index.service to create an initial index.html
+# To check whether this service was started correctly, you can run the command:
+# systemctl status generate-index.service
+# It will show you a information about the service, whether it has been loaded or active
+# and a log that will tell you whether the service ran successfully
+systemctl start generate-index.service
+
+# Start and enable generate-index.timer to make it start itself on reboot
+# To check whether this service was started correctly, you can run the command:
+# systemctl status generate-index.timer
+# It will show you a information about the service, whether it has been loaded and 
+# enabled/disabled or active, and a log that will tell you whether the timer ran its
+# service successfully
+systemctl enable --now generate-index.timer
+
+
+# NOTE: Task 3 -------------------------------------------------------------------------
+
+# Backup the existing nginx.conf file
+mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+
+# Copy nginx.conf to /etc/nginx
+# NOTE: Do I need to explain what I changed in the nginx.conf
+
+# To check whether this configuration file is configured correctly, run this command:
+# sudo nginx -t
+# This will tell you if there are any issues with your nginx.conf file
+cp ./nginx.conf /etc/nginx
+
+# Create sites-available and sites-enabled directories
+# This will be the method used to separate server blocks. This is important because,
+# in the case that you need to shut down a specific web server your server is serving,
+# you can do so without shutting down the others
+mkdir /etc/nginx/sites-available
+mkdir /etc/nginx/sites-enabled
+
+# Copy server block configuration to /etc/nginx/sites-available
+# The sites-available directory will hold individual server blocks which we can then
+# activate by creating a symbolic link to sites-enabled
+cp ./assignment3-serverblock.conf /etc/nginx/sites-available
+
+# Create symbolic link from sites-available to sites-enabled
+ln -s /etc/nginx/sites-available/assignment3-serverblock.conf /etc/nginx/sites-enabled/assignment3-serverblock.conf
+
+# Start and enable nginx service
+systemctl enable --now nginx
+
+# NOTE: Task 4 -------------------------------------------------------------------------
+
+# Start and enable ufw service
+systemctl enable --now ufw.service
+
+# Allow SSH connections 
+sudo ufw allow ssh
+
+# Limit SSH connections
+# This denies an incoming address if they attempt to connect more than 6 times within
+# 30 seconds
+sudo ufw limit ssh
+
+# Allow http so that http requests from our nginx web server can go through
+sudo ufw allow http
+
+# Finally, enable ufw
+# --force is used here to skip the y/n confirmation prompt
+# To check whether ufw is active or not you can use the command:
+# sudo ufw status verbose
+sudo ufw --force enable
