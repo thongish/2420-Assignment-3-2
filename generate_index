@@ -36,6 +36,7 @@ cat <<EOF > "$OUTPUT_FILE"
     <p><strong>Date:</strong> $DATE</p>
     <p><strong>Number of Installed Packages:</strong> $PACKAGE_COUNT</p>
     <p><strong>Public IP address of server:</strong> $PUBLIC_IP_ADRESS</p>
+    <a href="/documents">Link to file server</a>
 </body>
 </html>
 EOF
