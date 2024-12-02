@@ -18,19 +18,20 @@ pacman -S --noconfirm nginx ufw
 # Additionally, users without root privilege cannot log into the system user.
 sudo useradd --system -d /var/lib/webgen -s /usr/bin/nologin -m webgen
 
-
 # Create bin and HTML directories inside webgen home folder
 mkdir /var/lib/webgen/bin
 mkdir /var/lib/webgen/HTML
-
-# Change ownership of bin and HTML directories created above
-chown -R webgen:webgen /var/lib/webgen
+mkdir /var/lib/webgen/documents
 
 # Copy generate_index script to /var/lib/webgen/bin
 cp ./generate_index /var/lib/webgen/bin
 
-# Change ownership of generate_index
-chown webgen:webgen /var/lib/webgen/bin/generate_index
+# Copy sample files to /var/lib/webgen/documents
+cp ./file-one /var/lib/webgen/documents
+cp ./file-two /var/lib/webgen/documents
+
+# Change ownership of /var/lib/webgen directory recursively
+chown -R webgen:webgen /var/lib/webgen
 
 # NOTE: Task 2 -------------------------------------------------------------------------
 
