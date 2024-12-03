@@ -2,6 +2,12 @@
 
 # Setting up a load balancer on DigitalOcean
 
+# Table of contents
+- [Create the Nginx web servers](#create-the-nginx-web-servers)
+- [Create the load balancer](#create-the-load-balancer)
+
+# Create the Nginx web servers
+
 >[!NOTE]
 > When making your droplets, give them identical tags. This will be used later on when we create the load balancer.
 
@@ -37,3 +43,25 @@ sudo ./setup-script
 Check that everything worked by entering your both your droplet's IP addresses in your web browser. You should see something like this:
 
 ![Screenshot of working Nginx web server](./assets/success.png)
+
+# Create the load balancer
+
+To setup a load balancer on DigitalOcean:
+
+1. On your DigitalOcean dashboard, click the green "Create" button near the top right of your screen.
+
+2. Choose "Load Balancers" in the drop down menu.
+
+Most of the settings will be default. The only things we need to change are the datacenter region and the tag to use when connecting droplets.
+
+3. Choose the datacenter region that your two web server droplets belong to.
+
+4. Enter the tag you specified earlier when creating your web server droplets.
+
+![Screenshot of connect droplet config](./assets/balancer-tag.png)
+
+5. Optionally, you can name your load balancer.
+
+Once the load balancer is finished initializing, you will be able to enter its IP address into your browser and it will redirect you to either one of your web servers.Refresh the page to see the IP addresses change.
+
+# CONGRATS
