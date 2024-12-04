@@ -1,5 +1,6 @@
 [Unit]
 Description=Run generate_index script
+Requires=network-online.target
 After=network-online.target
 
 [Service]
