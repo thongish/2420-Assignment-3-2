@@ -27,7 +27,7 @@ sudo reboot
 
 3. SSH back into your droplet and clone this repository into your home directory:
 ```
-git clone https://github.com/thongish/2420-Assignment-3-1.git ~/nginx-setup
+git clone https://github.com/thongish/2420-Assignment-3-2.git ~/nginx-setup
 ```
 
 4. cd into the cloned directory:
